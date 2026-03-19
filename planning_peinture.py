@@ -556,7 +556,7 @@ for tab, zone in zip(tabs, ["SI", "MSI", "SE", "MSE"]):
                 "Salle": c.salle,
                 "Type":  "🔄 Reprise" if c.is_reprise else "Cycle",
             } for c in cycles])
-            st.dataframe(df, use_container_width=True, hide_index=True)
+            st.dataframe(df, use_container_width=True)
         else:
             st.info("Aucun cycle détecté pour cette zone.")
 
