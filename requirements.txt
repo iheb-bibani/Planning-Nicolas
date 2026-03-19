@@ -2,3 +2,4 @@ streamlit==1.19.0
 altair==4.2.2
 pandas
 numpy
+openpyxl
