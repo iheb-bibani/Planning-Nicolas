@@ -281,6 +281,9 @@ def extraire_externes(ws, zones, date_map, merge_map, cfg) -> list:
                     nv = cell_val(ws, row, nc)
                     if nv and not any(nv.upper().startswith(c) for c in codes_debut):
                         msn_cell = nv; break
+                # Ignorer les doublons BINOME
+                if "BINOME" in msn_cell.upper():
+                    col += 1; continue
                 msn   = extraire_msn(msn_cell)
                 salle = extraire_salle_ext(msn_cell) if msn_cell else "?"
                 if msn or msn_cell:
@@ -451,12 +454,12 @@ st.markdown("""
 # ── Header ────────────────────────────────────────────────────────────────────
 st.markdown("# ✈️ Planning Peinture — Extracteur automatique")
 st.markdown("Déposez votre fichier Planning pour remplir automatiquement les onglets **SI · MSI · SE · MSE**")
-st.markdown("---")
+st.divider()
 
 # ── Sidebar : configuration ───────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("## ⚙️ Configuration")
-    st.markdown("---")
+    st.divider()
 
     codes_debut = st.text_area(
         "Codes début de cycle (un par ligne)",
@@ -466,14 +469,14 @@ with st.sidebar:
         "Codes fin de cycle (CLT en premier = prioritaire)",
         value="\n".join(DEFAULT_CONFIG["codes_fin"]), height=75
     )
-    st.markdown("---")
+    st.divider()
 
     seuil = st.number_input(
         "Seuil MSN pour MSI / MSE (MSN strictement inférieur à)",
         min_value=100, max_value=99999,
         value=DEFAULT_CONFIG["seuil_msn"], step=1000
     )
-    st.markdown("---")
+    st.divider()
 
     st.markdown("**Marqueurs de zones (colonne A)**")
     m_int = st.text_input("Début zone interne",  DEFAULT_CONFIG["marqueur_interne"])
@@ -524,7 +527,7 @@ if any(n == "erreur" for n, _ in res.logs):
     st.stop()
 
 # ── Métriques ─────────────────────────────────────────────────────────────────
-st.markdown("---")
+st.divider()
 st.markdown("### 📊 Résumé")
 c1, c2, c3, c4, c5 = st.columns(5)
 c1.metric("🔵 SI",  len(res.SI))
@@ -533,7 +536,7 @@ c3.metric("🟢 SE",  len(res.SE))
 c4.metric("🟡 MSE", len(res.MSE))
 c5.metric("Total",  res.total)
 
-# ── Résultats ───────────────────────────────────────────────────────────────
+# ── Résultats ─────────────────────────────────────────────────────────────────
 st.markdown("### 📋 Détail des cycles")
 tabs = st.tabs(["🔵 SI", "🟣 MSI", "🟢 SE", "🟡 MSE"])
 
@@ -550,28 +553,24 @@ for tab, zone in zip(tabs, ["SI", "MSI", "SE", "MSE"]):
 
         if cycles:
             df = pd.DataFrame([{
-                "MSN":   c.msn,
+                "MSN":   str(c.msn),
                 "Début": c.debut_str,
                 "Fin":   c.fin_str,
-                "Salle": c.salle,
-                "Type":  "🔄 Reprise" if c.is_reprise else "Cycle",
+                "Salle": str(c.salle),
+                "Type":  "Reprise" if c.is_reprise else "Cycle",
             } for c in cycles])
-            # retire hide_index pour compatibilité
+            # Forcer tous les types en string — évite l'erreur LargeUtf8
             df = df.astype(str)
             st.dataframe(df, use_container_width=True)
         else:
             st.info("Aucun cycle détecté pour cette zone.")
 
-# ── Téléchargement ─────────────────────────────────────────────────────────
-st.markdown("---")
+# ── Téléchargement ────────────────────────────────────────────────────────────
+st.divider()
 st.markdown("### ⬇️ Télécharger le résultat")
 
 with st.spinner("Génération du fichier Excel..."):
     excel_bytes = exporter_excel(fichier_bytes, res)
-
-# force conversion en bytes si c'est un BytesIO
-if isinstance(excel_bytes, io.BytesIO):
-    excel_bytes = excel_bytes.getvalue()
 
 st.download_button(
     label="⬇️ Télécharger le fichier Excel complété",
@@ -579,4 +578,5 @@ st.download_button(
     file_name=fichier.name.replace(".xlsx", "_extrait.xlsx"),
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     use_container_width=True,
+    type="primary",
 )
