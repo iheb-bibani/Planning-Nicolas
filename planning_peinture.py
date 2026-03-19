@@ -454,12 +454,12 @@ st.markdown("""
 # ── Header ────────────────────────────────────────────────────────────────────
 st.markdown("# ✈️ Planning Peinture — Extracteur automatique")
 st.markdown("Déposez votre fichier Planning pour remplir automatiquement les onglets **SI · MSI · SE · MSE**")
-st.markdown("---")
+st.divider()
 
 # ── Sidebar : configuration ───────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("## ⚙️ Configuration")
-    st.markdown("---")
+    st.divider()
 
     codes_debut = st.text_area(
         "Codes début de cycle (un par ligne)",
@@ -469,14 +469,14 @@ with st.sidebar:
         "Codes fin de cycle (CLT en premier = prioritaire)",
         value="\n".join(DEFAULT_CONFIG["codes_fin"]), height=75
     )
-    st.markdown("---")
+    st.divider()
 
     seuil = st.number_input(
         "Seuil MSN pour MSI / MSE (MSN strictement inférieur à)",
         min_value=100, max_value=99999,
         value=DEFAULT_CONFIG["seuil_msn"], step=1000
     )
-    st.markdown("---")
+    st.divider()
 
     st.markdown("**Marqueurs de zones (colonne A)**")
     m_int = st.text_input("Début zone interne",  DEFAULT_CONFIG["marqueur_interne"])
@@ -571,6 +571,10 @@ st.markdown("### ⬇️ Télécharger le résultat")
 
 with st.spinner("Génération du fichier Excel..."):
     excel_bytes = exporter_excel(fichier_bytes, res)
+    # Garantir que c'est bien des bytes
+    if hasattr(excel_bytes, "getvalue"):
+        excel_bytes = excel_bytes.getvalue()
+    excel_bytes = bytes(excel_bytes)
 
 st.download_button(
     label="⬇️ Télécharger le fichier Excel complété",
@@ -578,5 +582,4 @@ st.download_button(
     file_name=fichier.name.replace(".xlsx", "_extrait.xlsx"),
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     use_container_width=True,
-    type="primary",
 )
