@@ -454,12 +454,12 @@ st.markdown("""
 # ── Header ────────────────────────────────────────────────────────────────────
 st.markdown("# ✈️ Planning Peinture — Extracteur automatique")
 st.markdown("Déposez votre fichier Planning pour remplir automatiquement les onglets **SI · MSI · SE · MSE**")
-st.divider()
+st.markdown("---")
 
 # ── Sidebar : configuration ───────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("## ⚙️ Configuration")
-    st.divider()
+    st.markdown("---")
 
     codes_debut = st.text_area(
         "Codes début de cycle (un par ligne)",
@@ -469,14 +469,14 @@ with st.sidebar:
         "Codes fin de cycle (CLT en premier = prioritaire)",
         value="\n".join(DEFAULT_CONFIG["codes_fin"]), height=75
     )
-    st.divider()
+    st.markdown("---")
 
     seuil = st.number_input(
         "Seuil MSN pour MSI / MSE (MSN strictement inférieur à)",
         min_value=100, max_value=99999,
         value=DEFAULT_CONFIG["seuil_msn"], step=1000
     )
-    st.divider()
+    st.markdown("---")
 
     st.markdown("**Marqueurs de zones (colonne A)**")
     m_int = st.text_input("Début zone interne",  DEFAULT_CONFIG["marqueur_interne"])
