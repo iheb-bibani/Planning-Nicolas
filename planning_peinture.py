@@ -247,7 +247,7 @@ def extraire_externes(ws, zones, date_map, merge_map, cfg) -> list:
 
     for row in range(zones.externe_debut, zones.externe_fin + 1):
         col4 = cell_val(ws, row, 4).upper()
-        if not (col4.startswith("ACTIVITE") or col4 == ""):
+        if not (col4.startswith("ACTIVITE") or col4 == "POSITION" or col4 == ""):
             continue
         is_expleo = row >= zones.expleo_debut
 
