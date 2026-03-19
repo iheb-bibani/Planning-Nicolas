@@ -533,7 +533,7 @@ c3.metric("🟢 SE",  len(res.SE))
 c4.metric("🟡 MSE", len(res.MSE))
 c5.metric("Total",  res.total)
 
-# ── Résultats ─────────────────────────────────────────────────────────────────
+# ── Résultats ───────────────────────────────────────────────────────────────
 st.markdown("### 📋 Détail des cycles")
 tabs = st.tabs(["🔵 SI", "🟣 MSI", "🟢 SE", "🟡 MSE"])
 
@@ -556,16 +556,21 @@ for tab, zone in zip(tabs, ["SI", "MSI", "SE", "MSE"]):
                 "Salle": c.salle,
                 "Type":  "🔄 Reprise" if c.is_reprise else "Cycle",
             } for c in cycles])
+            # retire hide_index pour compatibilité
             st.dataframe(df, use_container_width=True)
         else:
             st.info("Aucun cycle détecté pour cette zone.")
 
-# ── Téléchargement ────────────────────────────────────────────────────────────
+# ── Téléchargement ─────────────────────────────────────────────────────────
 st.markdown("---")
 st.markdown("### ⬇️ Télécharger le résultat")
 
 with st.spinner("Génération du fichier Excel..."):
     excel_bytes = exporter_excel(fichier_bytes, res)
+
+# force conversion en bytes si c'est un BytesIO
+if isinstance(excel_bytes, io.BytesIO):
+    excel_bytes = excel_bytes.getvalue()
 
 st.download_button(
     label="⬇️ Télécharger le fichier Excel complété",
@@ -573,5 +578,4 @@ st.download_button(
     file_name=fichier.name.replace(".xlsx", "_extrait.xlsx"),
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     use_container_width=True,
-    type="primary",
 )
