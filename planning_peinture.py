@@ -529,11 +529,27 @@ with col_rules:
 if not fichier:
     st.stop()
 
-# ── Extraction ────────────────────────────────────────────────────────────────
+# ── Extraction — mise en cache dans session_state ─────────────────────────────
+# On relit le fichier seulement si c'est un nouveau fichier
 fichier_bytes = fichier.read()
+fichier_id    = fichier.name + str(len(fichier_bytes))
 
-with st.spinner("🔍 Analyse en cours..."):
-    res = extraire(io.BytesIO(fichier_bytes), cfg)
+if st.session_state.get("fichier_id") != fichier_id:
+    with st.spinner("🔍 Analyse en cours..."):
+        res          = extraire(io.BytesIO(fichier_bytes), cfg)
+        excel_bytes  = exporter_excel(fichier_bytes, res)
+        if hasattr(excel_bytes, "getvalue"):
+            excel_bytes = excel_bytes.getvalue()
+        excel_bytes = bytes(excel_bytes)
+
+    st.session_state["fichier_id"]   = fichier_id
+    st.session_state["res"]          = res
+    st.session_state["excel_bytes"]  = excel_bytes
+    st.session_state["fichier_name"] = fichier.name
+
+res          = st.session_state["res"]
+excel_bytes  = st.session_state["excel_bytes"]
+fichier_name = st.session_state["fichier_name"]
 
 # ── Logs ──────────────────────────────────────────────────────────────────────
 ICONES = {"ok": "✅", "info": "ℹ️", "attention": "⚠️", "erreur": "❌"}
@@ -577,7 +593,6 @@ for tab, zone in zip(tabs, ["SI", "MSI", "SE", "MSE"]):
                 "Salle": str(c.salle),
                 "Type":  "Reprise" if c.is_reprise else "Cycle",
             } for c in cycles]
-            # st.table évite complètement Arrow/LargeUtf8
             st.table(rows)
         else:
             st.info("Aucun cycle détecté pour cette zone.")
@@ -586,17 +601,10 @@ for tab, zone in zip(tabs, ["SI", "MSI", "SE", "MSE"]):
 st.markdown("---")
 st.markdown("### ⬇️ Télécharger le résultat")
 
-with st.spinner("Génération du fichier Excel..."):
-    excel_bytes = exporter_excel(fichier_bytes, res)
-    # Garantir que c'est bien des bytes
-    if hasattr(excel_bytes, "getvalue"):
-        excel_bytes = excel_bytes.getvalue()
-    excel_bytes = bytes(excel_bytes)
-
 st.download_button(
     label="⬇️ Télécharger le fichier Excel complété",
     data=excel_bytes,
-    file_name=fichier.name.replace(".xlsx", "_extrait.xlsx"),
+    file_name=fichier_name.replace(".xlsx", "_extrait.xlsx"),
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     use_container_width=True,
 )
