@@ -448,6 +448,24 @@ st.markdown("""
 <style>
     #MainMenu, footer { visibility: hidden; }
     .block-container { padding-top: 2rem; }
+    div[data-testid="stDownloadButton"] button {
+        background: linear-gradient(135deg, #1d4ed8, #6d28d9);
+        color: white !important;
+        border: none;
+        border-radius: 10px;
+        padding: 14px 28px;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        width: 100%;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(29, 78, 216, 0.35);
+        transition: opacity 0.2s, transform 0.1s;
+    }
+    div[data-testid="stDownloadButton"] button:hover {
+        opacity: 0.88;
+        transform: translateY(-2px);
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -552,16 +570,15 @@ for tab, zone in zip(tabs, ["SI", "MSI", "SE", "MSE"]):
         m3.metric("⚠️ Sans date de fin", nb_ko)
 
         if cycles:
-            df = pd.DataFrame([{
+            rows = [{
                 "MSN":   str(c.msn),
                 "Début": c.debut_str,
                 "Fin":   c.fin_str,
                 "Salle": str(c.salle),
                 "Type":  "Reprise" if c.is_reprise else "Cycle",
-            } for c in cycles])
-            # Forcer tous les types en string — évite l'erreur LargeUtf8
-            df = df.astype(str)
-            st.dataframe(df, use_container_width=True)
+            } for c in cycles]
+            # st.table évite complètement Arrow/LargeUtf8
+            st.table(rows)
         else:
             st.info("Aucun cycle détecté pour cette zone.")
 
