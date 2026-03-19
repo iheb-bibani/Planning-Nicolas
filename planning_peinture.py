@@ -527,7 +527,7 @@ if any(n == "erreur" for n, _ in res.logs):
     st.stop()
 
 # ── Métriques ─────────────────────────────────────────────────────────────────
-st.divider()
+st.markdown("---")
 st.markdown("### 📊 Résumé")
 c1, c2, c3, c4, c5 = st.columns(5)
 c1.metric("🔵 SI",  len(res.SI))
@@ -566,7 +566,7 @@ for tab, zone in zip(tabs, ["SI", "MSI", "SE", "MSE"]):
             st.info("Aucun cycle détecté pour cette zone.")
 
 # ── Téléchargement ────────────────────────────────────────────────────────────
-st.divider()
+st.markdown("---")
 st.markdown("### ⬇️ Télécharger le résultat")
 
 with st.spinner("Génération du fichier Excel..."):
