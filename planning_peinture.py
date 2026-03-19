@@ -583,33 +583,20 @@ for tab, zone in zip(tabs, ["SI", "MSI", "SE", "MSE"]):
             st.info("Aucun cycle détecté pour cette zone.")
 
 # ── Téléchargement ────────────────────────────────────────────────────────────
-<style>
-/* Bouton Streamlit download */
-div[data-testid="stDownloadButton"] button {
-    background: linear-gradient(135deg, #1d4ed8, #6d28d9); /* dégradé bleu → violet */
-    color: white !important;                                 /* texte blanc */
-    border: none;
-    border-radius: 12px;
-    padding: 14px 28px;
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 0.4px;
-    width: 100%;
-    cursor: pointer;
-    box-shadow: 0 6px 20px rgba(29, 78, 216, 0.35);
-    transition: all 0.2s ease-in-out;
-}
+st.markdown("---")
+st.markdown("### ⬇️ Télécharger le résultat")
 
-/* Hover / survol */
-div[data-testid="stDownloadButton"] button:hover {
-    opacity: 0.95;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(29, 78, 216, 0.4);
-}
+with st.spinner("Génération du fichier Excel..."):
+    excel_bytes = exporter_excel(fichier_bytes, res)
+    # Garantir que c'est bien des bytes
+    if hasattr(excel_bytes, "getvalue"):
+        excel_bytes = excel_bytes.getvalue()
+    excel_bytes = bytes(excel_bytes)
 
-/* Focus / click */
-div[data-testid="stDownloadButton"] button:active {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
-}
-</style>
+st.download_button(
+    label="⬇️ Télécharger le fichier Excel complété",
+    data=excel_bytes,
+    file_name=fichier.name.replace(".xlsx", "_extrait.xlsx"),
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    use_container_width=True,
+)
